@@ -23,6 +23,11 @@ class Student {
   // 生徒名リスト
   private readonly _studentNameList: string[];
 
+  // 余りの生徒が発生したことによって「1人」となっているか
+  private _isAloneBySurplus: boolean = false;
+  // 出力用の今回レッスン値
+  private _outCurrentLessonVal: string = '';
+
   /**
    * コンストラクタ
    * @param studentNum 生徒番号
@@ -70,8 +75,7 @@ class Student {
    * 今回授業で「1人」かどうかを返す
    */
   public get isAlone(): boolean {
-    const str: string = this.lastIndexValue;
-    return 0 < this.IN_ALONE_STR_ARR.filter(value => value === str).length;
+    return this._isAloneBySurplus || 0 < this.IN_ALONE_STR_ARR.filter(value => value === this.lastIndexValue).length;
   }
 
   /**
@@ -121,14 +125,35 @@ class Student {
   }
 
   /**
-   * 今回レッスンの値を返す
+   * 入力された今回レッスン値を返す
    */
-  public get currentLessonValue(): string {
+  public get inCurrentLessonVal(): string {
     // 今回のレッスンがすでに「1人」の場合
     if (this.isAlone) {
       return this.OUT_ALONE_STR;
     }
     return this.isAbsence || this.wasWithdraw ? this.lastIndexValue : '';
+  }
+
+  /**
+   * 出力用の今回レッスン値を返す
+   */
+  public get outCurrentLessonVal(): string {
+    return this._outCurrentLessonVal;
+  }
+
+  /**
+   * 出力用の今回のレッスン値を設定する
+   */
+  public set outCurrentLessonVal(value: string) {
+    this._outCurrentLessonVal = value;
+  }
+
+  /**
+   * 余りの生徒が発生したことによってこの生徒の今回レッスン値を「1人」に切り替える
+   */
+  public switchAloneBySurplus() {
+    this._isAloneBySurplus = true;
   }
 
   /**

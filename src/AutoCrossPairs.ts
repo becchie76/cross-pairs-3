@@ -35,7 +35,7 @@ const AutoCrossPairs = (): void => {
   const studentWrapper: StudentWrapper = new StudentWrapper();
 
   // 選択中の今回の値を取得
-  const currentValues: string[][] = studentWrapper.getCurrentValues(pairValues);
+  const currentValues: string[][] = studentWrapper.makeCurrentPairVals(pairValues);
 
   // 今回の値を選択している列に設定
   activeRange.setValues(currentValues);
