@@ -49,6 +49,46 @@ class StudentWrapper {
   }
 
   /**
+   * 新しいペア相手等、今回のレッスンの値を決定して返す
+   * @param students 生徒配列
+   */
+  private decideCurrentValues(students: Student[]): Student[] {
+
+    // 生徒に余りが発生することによって「1人」となる生徒を決める
+    this.decideAloneStudentBySurplus(students);
+
+    // ここから生徒ひとりずつの処理
+    // ペアを組むためにはまず、当該生徒が今回のレッスンに出席しなければなりません。
+    // そのため、当該生徒が今回のレッスンに欠席する、事前に講師によって「1人」が入力されている、
+    // またはすでに退会している生徒はペア組み処理をしません。
+    // なお、このループ内でペア相手となった生徒はすでにペア相手が決まっているのでやはり処理しません。
+    for (let student of students) {
+
+      if (student.isAbsence || student.wasWithdraw || student.isAlone) {
+        // すでに入力済の値をそのまま使用する
+        student.outCurrentLessonVal = student.inCurrentLessonVal;
+        continue;
+      }
+      // 当該生徒のペア相手がすでに決定している場合
+      else if (0 < student.outCurrentLessonVal.length) {
+        continue;
+      }
+
+      // ペア相手を決める
+      const pairPartnerNum: number = this.decidePairPartner(student, students);
+
+      // 今回の値配列の対象生徒にペア相手の生徒名を格納
+      students[student.studentNum].outCurrentLessonVal
+            = students.filter(value => value.studentNum === pairPartnerNum)[0].studentName;
+
+      // 今回の値配列のペア相手生徒に処理中生徒の生徒名を格納
+      students[pairPartnerNum].outCurrentLessonVal
+            = students.filter(value => value.studentNum === student.studentNum)[0].studentName;
+    }
+    return students;
+  }
+
+  /**
    * 生徒に余りが発生することによって「1人」となる生徒を決める
    *   今回のレッスンで「休み」,「退会(済)」,すでに「1人」が設定されている生徒以外の生徒の数が
    *   奇数のときだけ「1人」になる生徒を決める。
@@ -79,53 +119,26 @@ class StudentWrapper {
   }
 
   /**
-   * 新しいペア相手等、今回のレッスンの値を決定して返す
+   * ペア相手を決める
+   * @param doingStudent 処理中生徒
    * @param students 生徒配列
    */
-  private decideCurrentValues(students: Student[]): Student[] {
+  private decidePairPartner(doingStudent: Student, students: Student[]) : number {
 
-    // 生徒に余りが発生することによって「1人」となる生徒を決める
-    this.decideAloneStudentBySurplus(students);
+    // ペア候補者を抽出する
+    const candidateStudents: Student[] = this.extractCandidateStudents(doingStudent, students);
 
-    // ここから生徒ひとりずつの処理
-    // ペアを組むためにはまず、当該生徒が今回のレッスンに出席しなければなりません。
-    // そのため、当該生徒が今回のレッスンに欠席する、事前に講師によって「1人」が入力されている、
-    // すでに退会している、または↑の処理によって「1人」となっている生徒はペア組み処理をしません。
-    // なお、このループ内でペア相手となった生徒はすでにペア相手が決まっているのでやはり処理しません。
-    for (let num = 0; num < students.length; num++) {
+    // ペア相手を決めるための前回までのレッスンでのペア回数配列を生成
+    const pairCountArray: number[] = this.createPairCountArray(doingStudent, candidateStudents);
 
-      if (students[num].isAbsence || students[num].wasWithdraw || students[num].isAlone) {
-        // すでに入力済の値をそのまま使用する
-        students[num].outCurrentLessonVal = students[num].inCurrentLessonVal;
-        continue;
-      }
-      // 当該生徒のペア相手がすでに決定している場合
-      else if (0 < students[num].outCurrentLessonVal.length) {
-        continue;
-      }
+    // もっとも少ないペア回数の生徒のインデックスNo.を要素とした配列を生成
+    const leastPairCountStudents: number[] = this.createLeastPairCountStudents(pairCountArray);
 
-      // ペア候補者を抽出する
-      const candidateStudents: Student[] = this.extractCandidateStudents(students[num], students);
-
-      // ペア相手を決めるための前回までのレッスンでのペア回数配列を生成
-      const pairCountArray: number[] = this.createPairCountArray(students[num], candidateStudents);
-
-      // もっとも少ないペア回数の生徒のインデックスNo.を要素とした配列を生成
-      const leastPairCountStudents: number[] = this.createLeastPairCountStudents(pairCountArray);
-
-      // もっとも少ないペア回数の生徒の中からランダムでペア相手を選ぶ
-      const pairPartnerNum: number
-            = leastPairCountStudents[Math.floor(Math.random() * leastPairCountStudents.length)];
-
-      // 今回の値配列の対象生徒にペア相手の生徒名を格納
-      students[students[num].studentNum].outCurrentLessonVal
-            = students.filter(value => value.studentNum === pairPartnerNum)[0].studentName;
-
-      // 今回の値配列のペア相手生徒に処理中生徒の生徒名を格納
-      students[pairPartnerNum].outCurrentLessonVal
-            = students.filter(value => value.studentNum === students[num].studentNum)[0].studentName;
-    }
-    return students;
+    // もっとも少ないペア回数の生徒の中からランダムでペア相手を選ぶ
+    const pairPartnerNum: number
+          = leastPairCountStudents[Math.floor(Math.random() * leastPairCountStudents.length)];
+    
+    return pairPartnerNum;
   }
 
   /**
