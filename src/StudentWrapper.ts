@@ -64,13 +64,8 @@ class StudentWrapper {
     // なお、このループ内でペア相手となった生徒はすでにペア相手が決まっているのでやはり処理しません。
     for (let student of students) {
 
-      if (student.isAbsence || student.wasWithdraw || student.isAlone) {
-        // すでに入力済の値をそのまま使用する
-        student.outCurrentLessonVal = student.inCurrentLessonVal;
-        continue;
-      }
-      // 当該生徒のペア相手がすでに決定している場合
-      else if (0 < student.outCurrentLessonVal.length) {
+      // 出力用の今回レッスン値がすでに決まっている場合は何もせずに次の生徒の処理へ
+      if (0 < student.outCurrentLessonVal.length) {
         continue;
       }
 

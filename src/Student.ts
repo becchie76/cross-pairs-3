@@ -125,21 +125,13 @@ class Student {
   }
 
   /**
-   * 入力された今回レッスン値を返す
-   */
-  public get inCurrentLessonVal(): string {
-    // 今回のレッスンがすでに「1人」の場合
-    if (this.isAlone) {
-      return this.OUT_ALONE_STR;
-    }
-    return this.isAbsence || this.wasWithdraw ? this.lastIndexValue : '';
-  }
-
-  /**
    * 出力用の今回レッスン値を返す
    */
   public get outCurrentLessonVal(): string {
-    return this._outCurrentLessonVal;
+    if (this.isAlone || this._isAloneBySurplus) {
+      return this.OUT_ALONE_STR;
+    }
+    return this.isAbsence || this.wasWithdraw ? this.lastIndexValue : this._outCurrentLessonVal;
   }
 
   /**
