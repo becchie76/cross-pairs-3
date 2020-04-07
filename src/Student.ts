@@ -17,11 +17,11 @@ class Student {
   private readonly IN_WITHDRAW_STR_ARR: string[] = [ '退' ];
 
   // 生徒番号
-  private readonly _studentNum: number;
+  private readonly _aStudentNum: number;
   // 生徒のデータが格納されているセルの値
-  private readonly _studentCellValues: string[];
+  private readonly _aStudentCellValues: string[];
   // 生徒名リスト
-  private readonly _studentNameList: string[];
+  private readonly _someStudentsNameList: string[];
 
   // 余りの生徒が発生したことによって「1人」となっているか
   private _isAloneBySurplus: boolean = false;
@@ -30,36 +30,36 @@ class Student {
 
   /**
    * コンストラクタ
-   * @param studentNum 生徒番号
-   * @param studentCellValues 生徒のデータが格納されているセルの値（配列）
+   * @param aStudentNum 生徒番号
+   * @param aStudentCellValues 生徒のデータが格納されているセルの値（配列）
    *        0番目：生徒名  最後：今回のレッスンのデータ  残り：これまでのペア相手など
-   * @param studentNameList 生徒名リスト
+   * @param someStudentsNameList 生徒名リスト
    */
-  constructor(studentNum: number, studentCellValues: string[], studentNameList: string[]) {
-    this._studentNum = studentNum;
-    this._studentCellValues = studentCellValues;
-    this._studentNameList = studentNameList;
+  constructor(aStudentNum: number, aStudentCellValues: string[], someStudentsNameList: string[]) {
+    this._aStudentNum = aStudentNum;
+    this._aStudentCellValues = aStudentCellValues;
+    this._someStudentsNameList = someStudentsNameList;
   }
 
   /**
    * 生徒番号を返す
    */
   public get studentNum(): number {
-    return this._studentNum;
+    return this._aStudentNum;
   }
 
   /**
    * 生徒名を返す
    */
   public get studentName(): string {
-    return this._studentCellValues[0];
+    return this._aStudentCellValues[0];
   }
 
   /**
    * 退会しているかどうかを返す
    */
   public get wasWithdraw(): boolean {
-    return this._studentCellValues.some(value =>
+    return this._aStudentCellValues.some(value =>
            0 < this.IN_WITHDRAW_STR_ARR.filter(value2 => value2 === value.charAt(0)).length);
   }
 
@@ -82,7 +82,7 @@ class Student {
    * 前回までの授業で「1人」だったときの回数を返す
    */
   public get aloneCount(): number {
-    return this._studentCellValues.filter(value =>
+    return this._aStudentCellValues.filter(value =>
       0 < this.IN_ALONE_STR_ARR.filter(value2 => value2 === value).length
     ).length;
   }
@@ -97,15 +97,15 @@ class Student {
 
     //※↑のコードのほうが簡潔だが同じメソッドを2回呼び出しているのでパフォーマンスを考慮して↓のコードとする
 
-    const arr: string[] = [];
-    for (const studentValue of this._studentCellValues) {
+    const result: string[] = [];
+    for (const studentValue of this._aStudentCellValues) {
       const obj: { incompatible: boolean; studentName: string }
             = this.getCompatibilityObject(studentValue);
       if (obj.incompatible) {
-        arr.push(obj.studentName);
+        result.push(obj.studentName);
       }
     }
-    return arr;
+    return result;
   }
 
   /**
@@ -113,15 +113,15 @@ class Student {
    *   ※配列のインデックスと生徒インデックスが紐づけられていることに注意!!
    */
   public get beforePairs(): number[] {
-    const arr: number[] = new Array(this._studentNameList.length).fill(0);
-    for (let cnt = 0; cnt < this._studentNameList.length; cnt++) {
+    const result: number[] = new Array(this._someStudentsNameList.length).fill(0);
+    for (let cnt = 0; cnt < this._someStudentsNameList.length; cnt++) {
       // ※「index !== 0」は配列の1番目を除外するための条件
-      arr[cnt] = this._studentCellValues.filter((value, index) =>
+      result[cnt] = this._aStudentCellValues.filter((value, index) =>
           index !== 0 &&
-          this.getCompatibilityObject(value).studentName === this._studentNameList[cnt]
+          this.getCompatibilityObject(value).studentName === this._someStudentsNameList[cnt]
       ).length;
     }
-    return arr;
+    return result;
   }
 
   /**
@@ -159,7 +159,7 @@ class Student {
    * 生徒データ配列の最後の要素の値を返す
    */
   private get lastIndexValue(): string {
-    return this._studentCellValues[this._studentCellValues.length - 1];
+    return this._aStudentCellValues[this._aStudentCellValues.length - 1];
   }
 
   /**
@@ -177,13 +177,13 @@ class Student {
    * @param studentName 生徒名
    */
   private getCompatibilityObject(studentName: string) {
-    const objResult: { studentName: string, incompatible: boolean } = {
+    const result: { studentName: string, incompatible: boolean } = {
       studentName: '',
       incompatible: false
     };
 
     if (!studentName) {
-      return objResult;
+      return result;
     }
 
     // 文字列変数に格納しておく
@@ -192,13 +192,13 @@ class Student {
     const charValue: string = strValue.charAt(strValue.length - 1);
 
     if ('※' === charValue || '×' === charValue) {
-      objResult.studentName = strValue.slice(0, strValue.length - 1);
-      objResult.incompatible = true;
+      result.studentName = strValue.slice(0, strValue.length - 1);
+      result.incompatible = true;
     } else {
-      objResult.studentName = strValue;
-      objResult.incompatible = false;
+      result.studentName = strValue;
+      result.incompatible = false;
     }
 
-    return objResult;
+    return result;
   }
 }

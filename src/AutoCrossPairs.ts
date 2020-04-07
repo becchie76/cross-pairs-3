@@ -26,16 +26,17 @@ const AutoCrossPairs = (): void => {
   // ■今回のペア相手などを決めて選択中の列に設定
 
   // 選択している列を含むこれまでのペア情報を取得
-  const pairValues: string[][] = sheet.getRange(activeRange.getRow(),
-                                                STUDENT_NAME_COL_NO,
-                                                activeRange.getHeight(),
-                                                activeRange.getColumn() - 1).getDisplayValues();
+  const someStudentsCellValues: string[][]
+        = sheet.getRange(activeRange.getRow(),
+                         STUDENT_NAME_COL_NO,
+                         activeRange.getHeight(),
+                         activeRange.getColumn() - 1).getDisplayValues();
 
   // 生徒ラッパークラスのインスタンスを生成
   const studentWrapper: StudentWrapper = new StudentWrapper();
 
   // 選択中の今回の値を取得
-  const currentValues: string[][] = studentWrapper.makeCurrentPairVals(pairValues);
+  const currentValues: string[][] = studentWrapper.makeCurrentPairValues(someStudentsCellValues);
 
   // 今回の値を選択している列に設定
   activeRange.setValues(currentValues);

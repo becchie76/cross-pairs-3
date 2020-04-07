@@ -11,94 +11,94 @@ class StudentWrapper {
 
   /**
    * 生徒ごとの今回のデータ（ペア相手,「欠席」,「1人」 など）をつくる
-   * @param studentsCellValues 生徒たちのデータが格納されているセルの値（配列）
+   * @param someStudentsCellValues 生徒たちのデータが格納されているセルの値（配列）
    *        0番目：生徒名  最後：今回のレッスンのデータ  残り：これまでのペア相手など
    *        複数の生徒分あるので二次元配列となっている
    */
-  public makeCurrentPairVals(studentsCellValues: string[][]): string[][] {
+  public makeCurrentPairValues(someStudentsCellValues: string[][]): string[][] {
     // 生徒一人ひとりのインスタンスを生成して配列で保持
-    let students: Student[] = this.createStudents(studentsCellValues);
+    let someStudents: Student[] = this.createStudents(someStudentsCellValues);
     // 出力用の今回レッスン値を決める
-    students = this.decideCurrentValues(students);
+    someStudents = this.decideCurrentValues(someStudents);
     // 今回のレッスン値を二次元配列に変換してリターン
-    return this.change4SheetValue(students);
+    return this.change4SheetValue(someStudents);
   }
 
   /**
    * すべての生徒の生徒クラスのインスタンスを生成して返す
-   * @param studentsCellValues 生徒たちのデータが格納されているセルの値（配列）
+   * @param someStudentsCellValues 生徒たちのデータが格納されているセルの値（配列）
    */
-  private createStudents(studentsCellValues: string[][]): Student[] {
+  private createStudents(someStudentsCellValues: string[][]): Student[] {
     // 生徒名リストを作成
-    const studentNameList: string[] = studentsCellValues.map(value => value[0]);
+    const someStudentsNameList: string[] = someStudentsCellValues.map(value => value[0]);
     // 生徒一人ひとりのインスタンスを生成して配列で保持
-    const students: Student[] = new Array(studentsCellValues.length);
-    for (let num = 0; num < studentsCellValues.length; num++) {
-      students[num] = new Student(num, studentsCellValues[num], studentNameList);
+    const result: Student[] = new Array(someStudentsCellValues.length);
+    for (let num = 0; num < someStudentsCellValues.length; num++) {
+      result[num] = new Student(num, someStudentsCellValues[num], someStudentsNameList);
     }
-    return students;
+    return result;
   }
 
   /**
    * ペア対象の生徒を返す
    *   今回のレッスンにて「欠席」,「退会(済)」,「1人」でない生徒のみを返す。
-   * @param students 生徒配列
+   * @param someStudents 生徒配列
    */
-  private getPairTargetStudents(students: Student[]): Student[] {
-    return students.filter(value => !value.wasWithdraw && !value.isAbsence && !value.isAlone);
+  private getPairTargetStudents(someStudents: Student[]): Student[] {
+    return someStudents.filter(value => !value.wasWithdraw && !value.isAbsence && !value.isAlone);
   }
 
   /**
    * 新しいペア相手等、今回のレッスンの値を決定して返す
-   * @param students 生徒配列
+   * @param someStudents 生徒配列
    */
-  private decideCurrentValues(students: Student[]): Student[] {
+  private decideCurrentValues(someStudents: Student[]): Student[] {
 
     // 生徒に余りが発生することによって「1人」となる生徒を決める
-    this.decideAloneStudentBySurplus(students);
+    this.decideAloneStudentBySurplus(someStudents);
 
     // ここから生徒ひとりずつの処理
     // ペアを組むためにはまず、当該生徒が今回のレッスンに出席しなければなりません。
     // そのため、当該生徒が今回のレッスンに欠席する、事前に講師によって「1人」が入力されている、
     // またはすでに退会している生徒はペア組み処理をしません。
     // なお、このループ内でペア相手となった生徒はすでにペア相手が決まっているのでやはり処理しません。
-    for (let student of students) {
+    for (let aStudent of someStudents) {
 
       // 出力用の今回レッスン値がすでに決まっている場合は何もせずに次の生徒の処理へ
-      if (0 < student.outCurrentLessonVal.length) {
+      if (0 < aStudent.outCurrentLessonVal.length) {
         continue;
       }
 
       // ペア相手を決める
-      const pairPartnerNum: number = this.decidePairPartner(student, students);
+      const pairPartnerNum: number = this.decidePairPartner(aStudent, someStudents);
 
       // 今回の値配列の対象生徒にペア相手の生徒名を格納
-      students[student.studentNum].outCurrentLessonVal
-            = students.filter(value => value.studentNum === pairPartnerNum)[0].studentName;
+      someStudents[aStudent.studentNum].outCurrentLessonVal
+            = someStudents.filter(value => value.studentNum === pairPartnerNum)[0].studentName;
 
       // 今回の値配列のペア相手生徒に処理中生徒の生徒名を格納
-      students[pairPartnerNum].outCurrentLessonVal
-            = students.filter(value => value.studentNum === student.studentNum)[0].studentName;
+      someStudents[pairPartnerNum].outCurrentLessonVal
+            = someStudents.filter(value => value.studentNum === aStudent.studentNum)[0].studentName;
     }
-    return students;
+    return someStudents;
   }
 
   /**
    * 生徒に余りが発生することによって「1人」となる生徒を決める
    *   今回のレッスンで「休み」,「退会(済)」,すでに「1人」が設定されている生徒以外の生徒の数が
    *   奇数のときだけ「1人」になる生徒を決める。
-   * @param students 生徒配列
+   * @param someStudents 生徒配列
    */
-  private decideAloneStudentBySurplus(students: Student[]) {
+  private decideAloneStudentBySurplus(someStudents: Student[]) {
     // ペア対象生徒だけを取得
-    const pairTargetStudents: Student[] = this.getPairTargetStudents(students);
+    const pairTargetStudents: Student[] = this.getPairTargetStudents(someStudents);
 
     if (pairTargetStudents.length % 2 === 1) {
       // ペア対象生徒の数が奇数の場合
 
       // ペア対象生徒が「1人」になった回数のうちもっとも少ない回数を取得
       const oneMinAlone: number
-           = pairTargetStudents.reduce((pre, cur) => pre.aloneCount < cur.aloneCount ? pre : cur).aloneCount;
+            = pairTargetStudents.reduce((pre, cur) => pre.aloneCount < cur.aloneCount ? pre : cur).aloneCount;
 
       // ペア対象生徒の中から「1人」でレッスンした回数がもっとも少ない生徒を抽出
       const oneMinStudents: Student[]
@@ -109,19 +109,19 @@ class StudentWrapper {
             = oneMinStudents[Math.floor(Math.random() * oneMinStudents.length)].studentNum;
 
       // 抽出された生徒の今回レッスン値を「1人」に切り替える
-      students[targetStudentNo].switchAloneBySurplus();
+      someStudents[targetStudentNo].switchAloneBySurplus();
     }
   }
 
   /**
    * ペア相手を決める
    * @param doingStudent 処理中生徒
-   * @param students 生徒配列
+   * @param someStudents 生徒配列
    */
-  private decidePairPartner(doingStudent: Student, students: Student[]) : number {
+  private decidePairPartner(doingStudent: Student, someStudents: Student[]) : number {
 
     // ペア候補者を抽出する
-    const candidateStudents: Student[] = this.extractCandidateStudents(doingStudent, students);
+    const candidateStudents: Student[] = this.extractCandidateStudents(doingStudent, someStudents);
 
     // ペア相手を決めるための前回までのレッスンでのペア回数配列を生成
     const pairCountArray: number[] = this.createPairCountArray(doingStudent, candidateStudents);
@@ -130,38 +130,39 @@ class StudentWrapper {
     const leastPairCountStudents: number[] = this.createLeastPairCountStudents(pairCountArray);
 
     // もっとも少ないペア回数の生徒の中からランダムでペア相手を選ぶ
-    const pairPartnerNum: number
+    const result: number
           = leastPairCountStudents[Math.floor(Math.random() * leastPairCountStudents.length)];
     
-    return pairPartnerNum;
+    return result;
   }
 
   /**
    * 処理中生徒のペア候補者を抽出する
    * @param doingStudent 処理中生徒
-   * @param students 生徒配列
+   * @param someStudents 生徒配列
    */
-  private extractCandidateStudents(doingStudent: Student, students: Student[]) : Student[] {
+  private extractCandidateStudents(doingStudent: Student, someStudents: Student[]) : Student[] {
     // ペア候補者とは現在処理中の生徒のペア相手になるかもしれない生徒のことです。
     // ここではそのペア候補者を絞り込みます。
     // こちらも上と同様、今回のレッスンに欠席…などとなっている生徒は候補者から除外します。
-    const candidateStudents: Student[] = []; // ペア候補者用生徒配列
-    for (let num = 0; num < students.length; num++) {
-      if (students[num].studentNum === doingStudent.studentNum  // 自分自身か
-       || students[num].isAbsence                               // 欠席か
-       || students[num].wasWithdraw                             // 退会しているか
-       || students[num].isAlone                                 // 1人か
-       || students[num].outCurrentLessonVal !== '') {           // 出力用のレッスン値がすでに設定されているか
+    const result: Student[] = []; // ペア候補者用生徒配列
+
+    for (let aStudent of someStudents) {
+      if (aStudent.studentNum === doingStudent.studentNum  // 自分自身か
+       || aStudent.isAbsence                               // 欠席か
+       || aStudent.wasWithdraw                             // 退会しているか
+       || aStudent.isAlone                                 // 1人か
+       || aStudent.outCurrentLessonVal !== '') {           // 出力用のレッスン値がすでに設定されているか
         continue;
       }
       // 相性がよくない生徒もペア候補者としません
-      if (0 < doingStudent.incompatibles.filter(value => value === students[num].studentName).length) {
+      if (0 < doingStudent.incompatibles.filter(value => value === aStudent.studentName).length) {
         continue;
       }
       // ↑の条件をすべて突破した生徒をペア候補者に加えます
-      candidateStudents.push(students[num]);
+      result.push(aStudent);
     }
-    return candidateStudents;
+    return result;
   }
 
   /**
@@ -174,18 +175,18 @@ class StudentWrapper {
     const studentsCount: number = doingStudent.beforePairs.length;
     // ペア相手を決めるための前回までのレッスンでのペア回数配列を生成
     //   ※初期値をすべてペア回数としてはありえないほどの大きな数値としておく
-    const pairCountArray: number[] = new Array(studentsCount).fill(this.IMPOSSIBLE_BIG_NUMBER);
+    const result: number[] = new Array(studentsCount).fill(this.IMPOSSIBLE_BIG_NUMBER);
     // 前回までのレッスンでの生徒ごとのペア回数配列を取得
     const beforePairs: number[] = doingStudent.beforePairs;
 
     // ペア候補者の生徒だけ前回までのレッスンでのペア回数を↑で生成した配列に上書き
     // 非ペア候補者の生徒は上書きせずに値がありえないほどの大きな数値のままなのでこの↓の条件に引っかからない
-    for (let num2 = 0; num2 < studentsCount; num2++) {
-      if (0 < candidateStudents.filter(value => value.studentNum === num2).length) {
-        pairCountArray[num2] = beforePairs[num2];
+    for (let num = 0; num < studentsCount; num++) {
+      if (0 < candidateStudents.filter(value => value.studentNum === num).length) {
+        result[num] = beforePairs[num];
       }
     }
-    return pairCountArray;
+    return result;
   }
 
   /**
@@ -198,23 +199,23 @@ class StudentWrapper {
     const leastPairCount: number = pairCountArray.reduce((pre, cur) => (pre < cur ? pre : cur));
 
     // もっとも少ないペア回数の生徒のインデックスNo.を要素とした配列を生成
-    const leastPairCountStudents: number[] = [];
+    const result: number[] = [];
     for (let num2 = 0; num2 < pairCountArray.length; num2++) {
       if (pairCountArray[num2] === leastPairCount) {
-        leastPairCountStudents.push(num2);
+        result.push(num2);
       }
     }
-    return leastPairCountStudents;
+    return result;
   }
 
   /**
    * 生徒インスタンスより出力用の今回レッスン値をシートに設定するための値(二次元配列)に変換する
-   * @param students 生徒配列
+   * @param someStudents 生徒配列
    */
-  private change4SheetValue(students: Student[]): string[][] {
-    const result: string[][] = new Array(students.length);
-    for (let num = 0; num < students.length; num++) {
-      result[num] = new Array(students[num].outCurrentLessonVal);
+  private change4SheetValue(someStudents: Student[]): string[][] {
+    const result: string[][] = new Array(someStudents.length);
+    for (let num = 0; num < someStudents.length; num++) {
+      result[num] = new Array(someStudents[num].outCurrentLessonVal);
     }
     return result;
   }

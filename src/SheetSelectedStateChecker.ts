@@ -80,7 +80,7 @@ class SheetSelectedStateChecker {
     } else if (1 < selectedColumns) {
       Browser.msgBox('複数列を指定しています。1列のみ指定して実行してください。');
     }
-
+    
     return false;
   }
 
