@@ -16,12 +16,11 @@ class StudentWrapper {
    *        複数の生徒分あるので二次元配列となっている
    */
   public makeCurrentPairValues(someStudentsCellValues: string[][]): string[][] {
-    // 生徒一人ひとりのインスタンスを生成して配列で保持
     let someStudents: Student[] = this.createStudents(someStudentsCellValues);
     // 出力用の今回レッスン値を決める
     someStudents = this.decideCurrentValues(someStudents);
-    // 今回のレッスン値を二次元配列に変換してリターン
-    return this.change4SheetValue(someStudents);
+    // 今回のレッスン値を出力用データに変換してリターン
+    return this.changeOutputValue(someStudents);
   }
 
   /**
@@ -29,23 +28,12 @@ class StudentWrapper {
    * @param someStudentsCellValues 生徒たちのデータが格納されているセルの値（配列）
    */
   private createStudents(someStudentsCellValues: string[][]): Student[] {
-    // 生徒名リストを作成
     const someStudentsNameList: string[] = someStudentsCellValues.map(value => value[0]);
-    // 生徒一人ひとりのインスタンスを生成して配列で保持
     const result: Student[] = new Array(someStudentsCellValues.length);
     for (let num = 0; num < someStudentsCellValues.length; num++) {
       result[num] = new Student(num, someStudentsCellValues[num], someStudentsNameList);
     }
     return result;
-  }
-
-  /**
-   * ペア対象の生徒を返す
-   *   今回のレッスンにて「欠席」,「退会(済)」,「1人」でない生徒のみを返す。
-   * @param someStudents 生徒配列
-   */
-  private getPairTargetStudents(someStudents: Student[]): Student[] {
-    return someStudents.filter(value => !value.wasWithdraw && !value.isAbsence && !value.isAlone);
   }
 
   /**
@@ -90,8 +78,10 @@ class StudentWrapper {
    * @param someStudents 生徒配列
    */
   private decideAloneStudentBySurplus(someStudents: Student[]) {
-    // ペア対象生徒だけを取得
-    const pairTargetStudents: Student[] = this.getPairTargetStudents(someStudents);
+
+    // 今回のレッスンにて「欠席」,「退会(済)」,「1人」でない生徒のみ抽出
+    const pairTargetStudents: Student[]
+          = someStudents.filter(value => !value.isAbsence && !value.wasWithdraw && !value.isAlone);
 
     if (pairTargetStudents.length % 2 === 1) {
       // ペア対象生徒の数が奇数の場合
@@ -120,8 +110,8 @@ class StudentWrapper {
    */
   private decidePairPartner(doingStudent: Student, someStudents: Student[]) : number {
 
-    // ペア候補者を抽出する
-    const candidateStudents: Student[] = this.extractCandidateStudents(doingStudent, someStudents);
+    // ペア候補者を抽出
+    const candidateStudents: Student[] = this.extractPairCandidateStudents(doingStudent, someStudents);
 
     // ペア相手を決めるための前回までのレッスンでのペア回数配列を生成
     const pairCountArray: number[] = this.createPairCountArray(doingStudent, candidateStudents);
@@ -141,12 +131,8 @@ class StudentWrapper {
    * @param doingStudent 処理中生徒
    * @param someStudents 生徒配列
    */
-  private extractCandidateStudents(doingStudent: Student, someStudents: Student[]) : Student[] {
-    // ペア候補者とは現在処理中の生徒のペア相手になるかもしれない生徒のことです。
-    // ここではそのペア候補者を絞り込みます。
-    // こちらも上と同様、今回のレッスンに欠席…などとなっている生徒は候補者から除外します。
-    const result: Student[] = []; // ペア候補者用生徒配列
-
+  private extractPairCandidateStudents(doingStudent: Student, someStudents: Student[]) : Student[] {
+    const result: Student[] = [];
     for (let aStudent of someStudents) {
       if (aStudent.studentNum === doingStudent.studentNum  // 自分自身か
        || aStudent.isAbsence                               // 欠席か
@@ -155,11 +141,11 @@ class StudentWrapper {
        || aStudent.outCurrentLessonVal !== '') {           // 出力用のレッスン値がすでに設定されているか
         continue;
       }
-      // 相性がよくない生徒もペア候補者としません
+      // 相性がよくない生徒もペア候補者としない
       if (0 < doingStudent.incompatibles.filter(value => value === aStudent.studentName).length) {
         continue;
       }
-      // ↑の条件をすべて突破した生徒をペア候補者に加えます
+      // ↑の条件をすべて突破した生徒をペア候補者に加える
       result.push(aStudent);
     }
     return result;
@@ -212,7 +198,7 @@ class StudentWrapper {
    * 生徒インスタンスより出力用の今回レッスン値をシートに設定するための値(二次元配列)に変換する
    * @param someStudents 生徒配列
    */
-  private change4SheetValue(someStudents: Student[]): string[][] {
+  private changeOutputValue(someStudents: Student[]): string[][] {
     const result: string[][] = new Array(someStudents.length);
     for (let num = 0; num < someStudents.length; num++) {
       result[num] = new Array(someStudents[num].outCurrentLessonVal);

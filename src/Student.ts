@@ -92,15 +92,15 @@ class Student {
    *   ※相性が良くない生徒の名前が配列に格納されている
    */
   public get incompatibles(): string[] {
-    //return this._studentCellValues.filter(value => this.getCompatibilityObject(value).incompatible)
-    //                              .map(value => this.getCompatibilityObject(value).studentName);
+    //return this._studentCellValues.filter(value => this.formatStudentName(value).incompatible)
+    //                              .map(value => this.formatStudentName(value).studentName);
 
     //※↑のコードのほうが簡潔だが同じメソッドを2回呼び出しているのでパフォーマンスを考慮して↓のコードとする
 
     const result: string[] = [];
     for (const studentValue of this._aStudentCellValues) {
       const obj: { incompatible: boolean; studentName: string }
-            = this.getCompatibilityObject(studentValue);
+            = this.formatStudentName(studentValue);
       if (obj.incompatible) {
         result.push(obj.studentName);
       }
@@ -118,7 +118,7 @@ class Student {
       // ※「index !== 0」は配列の1番目を除外するための条件
       result[cnt] = this._aStudentCellValues.filter((value, index) =>
           index !== 0 &&
-          this.getCompatibilityObject(value).studentName === this._someStudentsNameList[cnt]
+          this.formatStudentName(value).studentName === this._someStudentsNameList[cnt]
       ).length;
     }
     return result;
@@ -163,39 +163,32 @@ class Student {
   }
 
   /**
-   * 相性と名前のオブジェクトを返す
-   * 引数の生徒名をもとにした相性オブジェクトを生成して返す。
+   * 生徒名を名前と相性データに切り分ける
    * 生徒名の最後に相性が良くない印（'※'または'×'）が付いていたら
    * オブジェクトのプロパティincompatibleにtrueを設定。
    * 同時に、名前からはこれらの印を除外して同オブジェクトのプロパティstudentNameに設定。
    *   例1）
    *    引数：'たろう※'
-   *    戻り値：incompatible:true, studentName:'たろう'
+   *    戻り値：studentName:'たろう', incompatible:true
    *   例2)
    *    引数：'じろう'
-   *    戻り値：incompatible:false, studentName:'じろう'
+   *    戻り値：studentName:'じろう', incompatible:false
    * @param studentName 生徒名
    */
-  private getCompatibilityObject(studentName: string) {
+  private formatStudentName(studentName: string) {
     const result: { studentName: string, incompatible: boolean } = {
       studentName: '',
       incompatible: false
     };
 
-    if (!studentName) {
-      return result;
-    }
+    if (!studentName) return result;
 
-    // 文字列変数に格納しておく
-    const strValue: string = studentName.toString();
-    // 名前の最終文字を取得
-    const charValue: string = strValue.charAt(strValue.length - 1);
-
-    if ('※' === charValue || '×' === charValue) {
-      result.studentName = strValue.slice(0, strValue.length - 1);
+    if ('※' === studentName.charAt(studentName.length - 1)
+      || '×' === studentName.charAt(studentName.length - 1)) {
+      result.studentName = studentName.slice(0, studentName.length - 1);
       result.incompatible = true;
     } else {
-      result.studentName = strValue;
+      result.studentName = studentName;
       result.incompatible = false;
     }
 
