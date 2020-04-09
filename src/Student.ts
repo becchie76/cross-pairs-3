@@ -180,9 +180,7 @@ class Student {
       studentName: '',
       incompatible: false
     };
-
     if (!studentName) return result;
-
     if ('※' === studentName.charAt(studentName.length - 1)
       || '×' === studentName.charAt(studentName.length - 1)) {
       result.studentName = studentName.slice(0, studentName.length - 1);
@@ -191,7 +189,6 @@ class Student {
       result.studentName = studentName;
       result.incompatible = false;
     }
-
     return result;
   }
 }
