@@ -44,14 +44,15 @@ class StudentWrapper {
     // 生徒に余りが発生することによって「1人」となる生徒を決める
     this.decideAloneStudentBySurplus(someStudents);
     for (let aStudent of someStudents) {
-      // 出力用の今回レッスン値がすでに決まっている場合は何もせずに次の生徒の処理へ
-      if (0 < aStudent.outCurrentLessonVal.length) continue;
-      // ペア相手を決める
-      const pairPartnerNum: number = this.decidePairPartner(aStudent, someStudents);
-      // 今回の値配列の対象生徒にペア相手の生徒名を格納
-      this.storeOutCurrentLessonValue(aStudent.studentNum, pairPartnerNum, someStudents);
-      // 今回の値配列のペア相手生徒に処理中生徒の生徒名を格納
-      this.storeOutCurrentLessonValue(pairPartnerNum, aStudent.studentNum, someStudents);
+      // 出力用の今回レッスン値がすでに決まっていない場合にのみペア相手を決める
+      if (aStudent.outCurrentLessonVal.length === 0) {
+        // ペア相手を決める
+        const pairPartnerNum: number = this.decidePairPartner(aStudent, someStudents);
+        // 今回の値配列の対象生徒にペア相手の生徒名を格納
+        this.storeOutCurrentLessonValue(aStudent.studentNum, pairPartnerNum, someStudents);
+        // 今回の値配列のペア相手生徒に処理中生徒の生徒名を格納
+        this.storeOutCurrentLessonValue(pairPartnerNum, aStudent.studentNum, someStudents);
+      }
     }
     return someStudents;
   }
@@ -95,8 +96,7 @@ class StudentWrapper {
     // もっとも少ないペア回数の生徒のインデックスNo.を要素とした配列を生成
     const leastPairCountStudents: number[] = this.createLeastPairCountStudents(pairCountArray);
     // もっとも少ないペア回数の生徒の中からランダムでペア相手を選ぶ
-    const result: number
-          = leastPairCountStudents[Math.floor(Math.random() * leastPairCountStudents.length)];
+    const result: number = leastPairCountStudents[Math.floor(Math.random() * leastPairCountStudents.length)];
     return result;
   }
 
@@ -156,9 +156,9 @@ class StudentWrapper {
     const leastPairCount: number = pairCountArray.reduce((pre, cur) => (pre < cur ? pre : cur));
     // もっとも少ないペア回数の生徒のインデックスNo.を要素とした配列を生成
     const result: number[] = [];
-    for (let num2 = 0; num2 < pairCountArray.length; num2++) {
-      if (pairCountArray[num2] === leastPairCount) {
-        result.push(num2);
+    for (let num = 0; num < pairCountArray.length; num++) {
+      if (pairCountArray[num] === leastPairCount) {
+        result.push(num);
       }
     }
     return result;
