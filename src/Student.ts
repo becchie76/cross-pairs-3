@@ -59,8 +59,9 @@ class Student {
    * 退会しているかどうか
    */
   public get wasWithdraw(): boolean {
-    return this._aStudentCellValues.some(value =>
-           0 < this.IN_WITHDRAW_STR_ARR.filter(value2 => value2 === value.charAt(0)).length);
+    return this._aStudentCellValues
+           .some(value => 0 < this.IN_WITHDRAW_STR_ARR
+                              .filter(value2 => value2 === value.charAt(0)).length);
   }
 
   /**
@@ -81,9 +82,9 @@ class Student {
    * 前回までの授業で「1人」だったときの回数
    */
   public get aloneCount(): number {
-    return this._aStudentCellValues.filter(value =>
-                                           0 < this.IN_ALONE_STR_ARR.filter(value2 => value2 === value).length)
-                                   .length;
+    return this._aStudentCellValues
+           .filter(value => 0 < this.IN_ALONE_STR_ARR.filter(value2 => value2 === value).length)
+           .length;
   }
 
   /**
@@ -114,11 +115,10 @@ class Student {
   public get beforePairs(): number[] {
     const result: number[] = new Array(this._someStudentsNameList.length).fill(0);
     for (let cnt = 0; cnt < this._someStudentsNameList.length; cnt++) {
-      result[cnt]
-        = this._aStudentCellValues.slice(1) // 自分自身を除くために1番目から読み込む
-                                  .filter((value) =>
-                                          this.formatStudentName(value).studentName === this._someStudentsNameList[cnt])
-                                  .length;
+      result[cnt] = this._aStudentCellValues
+                    .slice(1) // 自分自身を除くために1番目から読み込む
+                    .filter((value) => this.formatStudentName(value).studentName === this._someStudentsNameList[cnt])
+                    .length;
     }
     return result;
   }
