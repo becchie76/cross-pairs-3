@@ -11,7 +11,7 @@ class StudentWrapper {
 
   /**
    * 生徒ごとの今回のデータ（ペア相手,「欠席」,「1人」 など）をつくる
-   * @param someStudentsCellValues 生徒たちのデータが格納されているセルの値（配列）
+   * @param someStudentsCellValues 生徒たちのデータが格納されているセルの値リスト
    *        0番目：生徒名  最後：今回のレッスンのデータ  残り：これまでのペア相手など
    *        複数の生徒分あるので二次元配列となっている
    */
@@ -25,7 +25,7 @@ class StudentWrapper {
 
   /**
    * すべての生徒の生徒クラスのインスタンスを生成して返す
-   * @param someStudentsCellValues 生徒たちのデータが格納されているセルの値（配列）
+   * @param someStudentsCellValues 生徒たちのデータが格納されているセルの値リスト
    */
   private createStudents(someStudentsCellValues: string[][]): Student[] {
     const someStudentsNameList: string[] = someStudentsCellValues.map(value => value[0]);
@@ -38,7 +38,7 @@ class StudentWrapper {
 
   /**
    * 新しいペア相手等、今回のレッスンの値を決定して返す
-   * @param someStudents 生徒配列
+   * @param someStudents 生徒リスト
    */
   private decideCurrentValues(someStudents: Student[]): Student[] {
     // 生徒に余りが発生することによって「1人」となる生徒を決める
@@ -61,7 +61,7 @@ class StudentWrapper {
    * 生徒に余りが発生することによって「1人」となる生徒を決める
    *   今回のレッスンで「休み」,「退会(済)」,すでに「1人」が設定されている生徒以外の生徒の数が
    *   奇数のときだけ「1人」になる生徒を決める。
-   * @param someStudents 生徒配列
+   * @param someStudents 生徒リスト
    */
   private decideAloneStudentBySurplus(someStudents: Student[]) {
     // 今回のレッスンにて「欠席」,「退会(済)」,「1人」でない生徒のみ抽出
@@ -86,7 +86,7 @@ class StudentWrapper {
   /**
    * ペア相手を決める
    * @param doingStudent 処理中生徒
-   * @param someStudents 生徒配列
+   * @param someStudents 生徒リスト
    */
   private decidePairPartner(doingStudent: Student, someStudents: Student[]) : number {
     // ペア候補者を抽出
@@ -103,7 +103,7 @@ class StudentWrapper {
   /**
    * 処理中生徒のペア候補者を抽出する
    * @param doingStudent 処理中生徒
-   * @param someStudents 生徒配列
+   * @param someStudents 生徒リスト
    */
   private extractPairCandidateStudents(doingStudent: Student, someStudents: Student[]) : Student[] {
     const result: Student[] = [];
@@ -128,7 +128,7 @@ class StudentWrapper {
   /**
    * 前回までのレッスンでのペア回数配列を生成する
    * @param doingStudent 処理中生徒
-   * @param candidateStudents ペア候補者生徒
+   * @param candidateStudents ペア候補者生徒リスト
    */
   private createPairCountArray(doingStudent: Student, candidateStudents: Student[]) : number[] {
     const studentsCount: number = doingStudent.beforePairs.length;
@@ -148,8 +148,8 @@ class StudentWrapper {
   }
 
   /**
-   * もっとも少ないペア回数の生徒のインデックスNo.を要素とした配列を生成
-   * @param pairCountArray 前回までのレッスンでのペア回数配列
+   * もっとも少ないペア回数の生徒のインデックスNo.を要素としたリストを生成
+   * @param pairCountArray 前回までのレッスンでのペア回数リスト
    */
   private createLeastPairCountStudents(pairCountArray: number[]) : number[] {
     // もっとも少ないペア回数を取得
@@ -168,7 +168,7 @@ class StudentWrapper {
    * 今回の値を生徒インスタンスに格納する
    * @param targetStudentNum 対象生徒の生徒No.
    * @param partnerStudentNum ペア相手生徒の生徒No.
-   * @param someStudents 生徒配列
+   * @param someStudents 生徒リスト
    */
   private storeOutCurrentLessonValue(targetStudentNum: number,
                                      partnerStudentNum: number,
@@ -179,7 +179,7 @@ class StudentWrapper {
 
   /**
    * 生徒インスタンスより出力用の今回レッスン値をシートに設定するための値(二次元配列)に変換する
-   * @param someStudents 生徒配列
+   * @param someStudents 生徒リスト
    */
   private changeOutputValue(someStudents: Student[]): string[][] {
     const result: string[][] = new Array(someStudents.length);

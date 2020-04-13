@@ -8,7 +8,7 @@ class Student {
 
   // 【定数】
   // 出力用「1人」用文言
-  private readonly OUT_ALONE_STR: string = '1人';
+  private static readonly OUT_ALONE_STR: string = '1人';
   // 入力判定用「1人」文言
   private readonly IN_ALONE_STR_ARR: string[] = [ '1人', '１人', '一人' ];
   // 入力判定用「欠席」文言
@@ -42,21 +42,21 @@ class Student {
   }
 
   /**
-   * 生徒番号を返す
+   * 生徒番号
    */
   public get studentNum(): number {
     return this._aStudentNum;
   }
 
   /**
-   * 生徒名を返す
+   * 生徒名
    */
   public get studentName(): string {
     return this._aStudentCellValues[0];
   }
 
   /**
-   * 退会しているかどうかを返す
+   * 退会しているかどうか
    */
   public get wasWithdraw(): boolean {
     return this._aStudentCellValues.some(value =>
@@ -64,31 +64,30 @@ class Student {
   }
 
   /**
-   * 今回のレッスンにて欠席かどうかを返す
+   * 今回のレッスンにて欠席かどうか
    */
   public get isAbsence(): boolean {
-    const char: string = this.lastIndexValue.charAt(0);
-    return 0 < this.IN_ABSENCE_STR_ARR.filter(value => value === char).length;
+    return 0 < this.IN_ABSENCE_STR_ARR.filter(value => value === this.lastIndexValue.charAt(0)).length;
   }
 
   /**
-   * 今回授業で「1人」かどうかを返す
+   * 今回授業で「1人」かどうか
    */
   public get isAlone(): boolean {
     return this._isAloneBySurplus || 0 < this.IN_ALONE_STR_ARR.filter(value => value === this.lastIndexValue).length;
   }
 
   /**
-   * 前回までの授業で「1人」だったときの回数を返す
+   * 前回までの授業で「1人」だったときの回数
    */
   public get aloneCount(): number {
     return this._aStudentCellValues.filter(value =>
-      0 < this.IN_ALONE_STR_ARR.filter(value2 => value2 === value).length
-    ).length;
+                    0 < this.IN_ALONE_STR_ARR.filter(value2 => value2 === value).length
+                                          ).length;
   }
 
   /**
-   * 相性が良くない生徒の配列を返す
+   * 相性が良くない生徒リスト
    *   ※相性が良くない生徒の名前が配列に格納されている
    */
   public get incompatibles(): string[] {
@@ -109,7 +108,7 @@ class Student {
   }
 
   /**
-   * 前回までのレッスンでの生徒ごとのペア回数配列を返す
+   * 前回までのレッスンでの生徒ごとのペア回数リスト
    *   ※配列のインデックスと生徒インデックスが紐づけられていることに注意!!
    */
   public get beforePairs(): number[] {
@@ -117,19 +116,19 @@ class Student {
     for (let cnt = 0; cnt < this._someStudentsNameList.length; cnt++) {
       // ※「index !== 0」は配列の1番目を除外するための条件
       result[cnt] = this._aStudentCellValues.filter((value, index) =>
-          index !== 0 &&
-          this.formatStudentName(value).studentName === this._someStudentsNameList[cnt]
-      ).length;
+                             index !== 0 &&
+                             this.formatStudentName(value).studentName === this._someStudentsNameList[cnt]
+                                                   ).length;
     }
     return result;
   }
 
   /**
-   * 出力用の今回レッスン値を返す
+   * 出力用の今回レッスン値
    */
   public get outCurrentLessonVal(): string {
     if (this.isAlone || this._isAloneBySurplus) {
-      return this.OUT_ALONE_STR;
+      return Student.OUT_ALONE_STR;
     }
     return this.isAbsence || this.wasWithdraw ? this.lastIndexValue : this._outCurrentLessonVal;
   }
@@ -146,13 +145,6 @@ class Student {
    */
   public switchAloneBySurplus() {
     this._isAloneBySurplus = true;
-  }
-
-  /**
-   * 「1人」文言を返す
-   */
-  public get aloneString(): string {
-    return this.OUT_ALONE_STR;
   }
 
   /**
