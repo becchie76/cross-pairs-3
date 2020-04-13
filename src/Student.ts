@@ -82,8 +82,8 @@ class Student {
    */
   public get aloneCount(): number {
     return this._aStudentCellValues.filter(value =>
-                    0 < this.IN_ALONE_STR_ARR.filter(value2 => value2 === value).length
-                                          ).length;
+                                           0 < this.IN_ALONE_STR_ARR.filter(value2 => value2 === value).length)
+                                   .length;
   }
 
   /**
@@ -114,11 +114,11 @@ class Student {
   public get beforePairs(): number[] {
     const result: number[] = new Array(this._someStudentsNameList.length).fill(0);
     for (let cnt = 0; cnt < this._someStudentsNameList.length; cnt++) {
-      // ※「index !== 0」は配列の1番目を除外するための条件
-      result[cnt] = this._aStudentCellValues.filter((value, index) =>
-                             index !== 0 &&
-                             this.formatStudentName(value).studentName === this._someStudentsNameList[cnt]
-                                                   ).length;
+      result[cnt]
+        = this._aStudentCellValues.slice(1) // 自分自身を除くために1番目から読み込む
+                                  .filter((value) =>
+                                          this.formatStudentName(value).studentName === this._someStudentsNameList[cnt])
+                                  .length;
     }
     return result;
   }
@@ -127,9 +127,7 @@ class Student {
    * 出力用の今回レッスン値
    */
   public get outCurrentLessonVal(): string {
-    if (this.isAlone || this._isAloneBySurplus) {
-      return Student.OUT_ALONE_STR;
-    }
+    if (this.isAlone || this._isAloneBySurplus) return Student.OUT_ALONE_STR;
     return this.isAbsence || this.wasWithdraw ? this.lastIndexValue : this._outCurrentLessonVal;
   }
 

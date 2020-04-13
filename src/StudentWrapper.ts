@@ -43,7 +43,7 @@ class StudentWrapper {
   private decideCurrentValues(someStudents: Student[]): Student[] {
     // 生徒に余りが発生することによって「1人」となる生徒を決める
     this.decideAloneStudentBySurplus(someStudents);
-    for (let aStudent of someStudents) {
+    for (const aStudent of someStudents) {
       // 出力用の今回レッスン値がすでに決まっていない場合にのみペア相手を決める
       if (aStudent.outCurrentLessonVal.length === 0) {
         // ペア相手を決める
@@ -67,8 +67,8 @@ class StudentWrapper {
     // 今回のレッスンにて「欠席」,「退会(済)」,「1人」でない生徒のみ抽出
     const pairTargetStudents: Student[]
           = someStudents.filter(value => !value.isAbsence && !value.wasWithdraw && !value.isAlone);
+    // ペア対象生徒の数が奇数の場合のみ新たな「1人」を決める
     if (pairTargetStudents.length % 2 === 1) {
-      // ペア対象生徒の数が奇数の場合
       // ペア対象生徒が「1人」になった回数のうちもっとも少ない回数を取得
       const oneMinAlone: number
             = pairTargetStudents.reduce((pre, cur) => pre.aloneCount < cur.aloneCount ? pre : cur).aloneCount;
@@ -107,7 +107,7 @@ class StudentWrapper {
    */
   private extractPairCandidateStudents(doingStudent: Student, someStudents: Student[]) : Student[] {
     const result: Student[] = [];
-    for (let aStudent of someStudents) {
+    for (const aStudent of someStudents) {
       if (aStudent.studentNum === doingStudent.studentNum  // 自分自身か
        || aStudent.isAbsence                               // 欠席か
        || aStudent.wasWithdraw                             // 退会しているか
@@ -132,10 +132,10 @@ class StudentWrapper {
    */
   private createPairCountArray(doingStudent: Student, candidateStudents: Student[]) : number[] {
     const studentsCount: number = doingStudent.beforePairs.length;
-    // ペア相手を決めるための前回までのレッスンでのペア回数配列を生成
+    // ペア相手を決めるための前回までのレッスンでのペア回数リストを生成
     //   ※初期値をすべてペア回数としてはありえないほどの大きな数値としておく
     const result: number[] = new Array(studentsCount).fill(this.IMPOSSIBLE_BIG_NUMBER);
-    // 前回までのレッスンでの生徒ごとのペア回数配列を取得
+    // 前回までのレッスンでの生徒ごとのペア回数リストを取得
     const beforePairs: number[] = doingStudent.beforePairs;
     // ペア候補者の生徒だけ前回までのレッスンでのペア回数を↑で生成した配列に上書き
     // 非ペア候補者の生徒は上書きせずに値がありえないほどの大きな数値のままなのでこの↓の条件に引っかからない
@@ -157,9 +157,7 @@ class StudentWrapper {
     // もっとも少ないペア回数の生徒のインデックスNo.を要素とした配列を生成
     const result: number[] = [];
     for (let num = 0; num < pairCountArray.length; num++) {
-      if (pairCountArray[num] === leastPairCount) {
-        result.push(num);
-      }
+      if (pairCountArray[num] === leastPairCount) result.push(num);
     }
     return result;
   }
