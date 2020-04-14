@@ -109,21 +109,32 @@ class StudentWrapper {
   private extractPairCandidateStudents(doingStudent: Student, someStudents: Student[]) : Student[] {
     const result: Student[] = [];
     for (const aStudent of someStudents) {
-      if (aStudent.studentNum === doingStudent.studentNum  // 自分自身か
-       || aStudent.isAbsence                               // 欠席か
-       || aStudent.wasWithdraw                             // 退会しているか
-       || aStudent.isAlone                                 // 1人か
-       || aStudent.outCurrentLessonVal !== '') {           // 出力用のレッスン値がすでに設定されているか
-        continue;
+      if (this.isPairCandidateStudent(doingStudent, aStudent)) {
+        result.push(aStudent);
       }
-      // 相性がよくない生徒もペア候補者としない
-      if (0 < doingStudent.incompatibles.filter(value => value === aStudent.studentName).length) {
-        continue;
-      }
-      // ↑の条件をすべて突破した生徒をペア候補者に加える
-      result.push(aStudent);
     }
     return result;
+  }
+
+  /**
+   * 対象生徒がペア候補者となるかどうかを返す
+   *   ペア候補者となるならtrue、ならないならfalseを返す。
+   * @param doingStudent 処理中生徒
+   * @param targetStudent 対象生徒
+   */
+  private isPairCandidateStudent(doingStudent: Student, targetStudent: Student) : boolean {
+    if (targetStudent.studentNum === doingStudent.studentNum  // 自分自身か
+     || targetStudent.isAbsence                               // 欠席か
+     || targetStudent.wasWithdraw                             // 退会しているか
+     || targetStudent.isAlone                                 // 1人か
+     || targetStudent.outCurrentLessonVal !== '') {           // 出力用のレッスン値がすでに設定されているか
+       return false;
+     }
+     // 相性がよくない生徒もペア候補者としない
+     if (0 < doingStudent.incompatibles.filter(value => value === targetStudent.studentName).length) {
+       return false;
+     }
+     return true;
   }
 
   /**
@@ -177,10 +188,6 @@ class StudentWrapper {
    * @param someStudents 生徒リスト
    */
   private changeOutputValue(someStudents: Student[]): string[][] {
-    const result: string[][] = new Array(someStudents.length);
-    for (let num = 0; num < someStudents.length; num++) {
-      result[num] = new Array(someStudents[num].outCurrentLessonVal);
-    }
-    return result;
+    return someStudents.map(value => new Array(value.outCurrentLessonVal));
   }
 }
