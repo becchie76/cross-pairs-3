@@ -16,11 +16,38 @@ class StudentWrapper {
    *        複数の生徒分あるので二次元配列となっている
    */
   public makeCurrentPairValues(someStudentsCellValues: string[][]): string[][] {
-    let someStudents: Student[] = this.createStudents(someStudentsCellValues);
     // 出力用の今回レッスン値を決める
-    someStudents = this.decideCurrentValues(someStudents);
+    const someStudents: Student[] = this.decideCurrentValues(someStudentsCellValues);
     // 今回のレッスン値を出力用データに変換してリターン
     return this.changeOutputValue(someStudents);
+  }
+
+  /**
+   * 新しいペア相手等、今回のレッスンの値を決定して返す
+   * @param someStudentsCellValues 生徒たちのデータが格納されているセルの値リスト
+   */
+  private decideCurrentValues(someStudentsCellValues: string[][]): Student[] {
+    let someStudents: Student[] = this.createStudents(someStudentsCellValues);
+
+    // 生徒に余りが発生することによって「1人」となる生徒を決める
+    const aloneStudentNum: number = this.aloneBySurplusStudentNum(someStudents);
+    if (aloneStudentNum !== -1) {
+      someStudents[aloneStudentNum].switchAloneBySurplus();
+    }
+
+    for (const aStudent of someStudents) {
+      // 出力用の今回レッスン値がすでに決まっていない場合にのみペア相手を決める
+      if (aStudent.outCurrentLessonVal.length === 0) {
+        // ペア相手を決める
+        const pairPartnerNum: number = this.decidePairPartner(aStudent, someStudents);
+        // 今回の値配列の対象生徒にペア相手の生徒名を格納
+        aStudent.outCurrentLessonVal = this.studentName(pairPartnerNum, someStudents);
+        // 今回の値配列のペア相手生徒に処理中生徒の生徒名を格納
+        someStudents[pairPartnerNum].outCurrentLessonVal
+            = this.studentName(aStudent.studentNum, someStudents);
+      }
+    }
+    return someStudents;
   }
 
   /**
@@ -37,33 +64,13 @@ class StudentWrapper {
   }
 
   /**
-   * 新しいペア相手等、今回のレッスンの値を決定して返す
-   * @param someStudents 生徒リスト
-   */
-  private decideCurrentValues(someStudents: Student[]): Student[] {
-    // 生徒に余りが発生することによって「1人」となる生徒を決める
-    this.decideAloneStudentBySurplus(someStudents);
-    for (const aStudent of someStudents) {
-      // 出力用の今回レッスン値がすでに決まっていない場合にのみペア相手を決める
-      if (aStudent.outCurrentLessonVal.length === 0) {
-        // ペア相手を決める
-        const pairPartnerNum: number = this.decidePairPartner(aStudent, someStudents);
-        // 今回の値配列の対象生徒にペア相手の生徒名を格納
-        this.storeOutCurrentLessonValue(aStudent.studentNum, pairPartnerNum, someStudents);
-        // 今回の値配列のペア相手生徒に処理中生徒の生徒名を格納
-        this.storeOutCurrentLessonValue(pairPartnerNum, aStudent.studentNum, someStudents);
-      }
-    }
-    return someStudents;
-  }
-
-  /**
    * 生徒に余りが発生することによって「1人」となる生徒を決める
    *   今回のレッスンで「休み」,「退会(済)」,すでに「1人」が設定されている生徒以外の生徒の数が
-   *   奇数のときだけ「1人」になる生徒を決める。
+   *   奇数のときだけ新たに「1人」になる生徒を決める。
+   *   生徒の数が偶数のときは新たに「1人」になる生徒はいないので -1 を返す。
    * @param someStudents 生徒リスト
    */
-  private decideAloneStudentBySurplus(someStudents: Student[]) {
+  private aloneBySurplusStudentNum(someStudents: Student[]) : number {
     // 今回のレッスンにて「欠席」,「退会(済)」,「1人」でない生徒のみ抽出
     const pairTargetStudents: Student[]
           = someStudents.filter(value => !value.isAbsence && !value.wasWithdraw && !value.isAlone);
@@ -75,12 +82,10 @@ class StudentWrapper {
       // ペア対象生徒の中から「1人」でレッスンした回数がもっとも少ない生徒を抽出
       const oneMinStudents: Student[]
             = pairTargetStudents.filter(value => value.aloneCount === oneMinAlone);
-      // 「1人」で授業した回数がもっとも少ない生徒の中からランダムで1人を抽出
-      const targetStudentNo: number
-            = oneMinStudents[Math.floor(Math.random() * oneMinStudents.length)].studentNum;
-      // 抽出された生徒の今回レッスン値を「1人」に切り替える
-      someStudents[targetStudentNo].switchAloneBySurplus();
+      // 「1人」で授業した回数がもっとも少ない生徒の中からランダムで1人を抽出して返す
+      return oneMinStudents[Math.floor(Math.random() * oneMinStudents.length)].studentNum;
     }
+    else return -1;
   }
 
   /**
@@ -162,17 +167,26 @@ class StudentWrapper {
     return result;
   }
 
+  // /**
+  //  * 今回の値を生徒インスタンスに格納する
+  //  * @param targetStudentNum 対象生徒の生徒No.
+  //  * @param partnerStudentNum ペア相手生徒の生徒No.
+  //  * @param someStudents 生徒リスト
+  //  */
+  // private storeOutCurrentLessonValue(targetStudentNum: number,
+  //                                    partnerStudentNum: number,
+  //                                    someStudents: Student[] ) {
+  //   someStudents[targetStudentNum].outCurrentLessonVal
+  //       = someStudents.filter(value => value.studentNum === partnerStudentNum)[0].studentName;
+  // }
+
   /**
-   * 今回の値を生徒インスタンスに格納する
-   * @param targetStudentNum 対象生徒の生徒No.
-   * @param partnerStudentNum ペア相手生徒の生徒No.
+   * 生徒No.に該当する生徒名
+   * @param studentNum 生徒No.
    * @param someStudents 生徒リスト
    */
-  private storeOutCurrentLessonValue(targetStudentNum: number,
-                                     partnerStudentNum: number,
-                                     someStudents: Student[] ) {
-    someStudents[targetStudentNum].outCurrentLessonVal
-        = someStudents.filter(value => value.studentNum === partnerStudentNum)[0].studentName;
+  private studentName(studentNum: number, someStudents: Student[]) : string {
+    return someStudents.filter(value => value.studentNum === studentNum)[0].studentName;
   }
 
   /**
