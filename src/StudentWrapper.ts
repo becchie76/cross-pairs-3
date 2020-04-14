@@ -163,19 +163,6 @@ class StudentWrapper {
     return result;
   }
 
-  // /**
-  //  * 今回の値を生徒インスタンスに格納する
-  //  * @param targetStudentNum 対象生徒の生徒No.
-  //  * @param partnerStudentNum ペア相手生徒の生徒No.
-  //  * @param someStudents 生徒リスト
-  //  */
-  // private storeOutCurrentLessonValue(targetStudentNum: number,
-  //                                    partnerStudentNum: number,
-  //                                    someStudents: Student[] ) {
-  //   someStudents[targetStudentNum].outCurrentLessonVal
-  //       = someStudents.filter(value => value.studentNum === partnerStudentNum)[0].studentName;
-  // }
-
   /**
    * 生徒No.に該当する生徒名
    * @param studentNum 生徒No.
