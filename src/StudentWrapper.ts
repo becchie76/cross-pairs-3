@@ -56,11 +56,7 @@ class StudentWrapper {
    */
   private createStudents(someStudentsCellValues: string[][]): Student[] {
     const someStudentsNameList: string[] = someStudentsCellValues.map(value => value[0]);
-    const result: Student[] = new Array(someStudentsCellValues.length);
-    for (let num = 0; num < someStudentsCellValues.length; num++) {
-      result[num] = new Student(num, someStudentsCellValues[num], someStudentsNameList);
-    }
-    return result;
+    return someStudentsCellValues.map((value, index) => new Student(index, value, someStudentsNameList));
   }
 
   /**
